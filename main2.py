@@ -2,8 +2,11 @@ import discord
 import os
 import key
 import youtube_dl
+import cleanup
 from discord.ext import commands,tasks
 from dotenv import load_dotenv
+
+
 
 TOKEN = key.TOKEN
 client2 = discord.Client()
@@ -59,6 +62,11 @@ class YTDLSource(discord.PCMVolumeTransformer):
 async def on_ready():
     print('We have logged in as {0.user}'.format(bot))
 
+#@bot.listen()
+#async def on_member_remove(ctx):
+#    voice_client = ctx.message.guild.voice_client
+#    if not voice_client.is_playing():
+#        cleanup.clean()
 
 @bot.command(name='join', help='Tells the bot to join the voice channel')
 async def join(ctx):
@@ -74,9 +82,10 @@ async def leave(ctx):
     voice_client = ctx.message.guild.voice_client
     if voice_client.is_connected():
         await voice_client.disconnect()
+        cleanup.clean()
     else:
         await ctx.send("The bot is not connected to a voice channel.")
-
+            
 #----------------------------------------------------------------------------------
 @bot.command(name='play', help='To play song')
 async def play(ctx,url):
@@ -119,7 +128,7 @@ async def stop(ctx):
 @bot.command(name='purge', help='Deletes messages, specify a number for multiple')
 async def purge(ctx, amount = 5):
     await ctx.channel.purge(limit=amount+1)
-    print('A Channel has just been purged:', amount, 'messages were deleted')
+    print(ctx.channel, 'has just been purged:', amount, 'messages were deleted')
 
 bot.run(TOKEN)
 
