@@ -60,6 +60,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
 @bot.event
 async def on_ready():
+    await bot.change_presence(activity=discord.Game('you. !help'))
     print('We have logged in as {0.user}'.format(bot))
 
 #@bot.listen()
@@ -124,11 +125,19 @@ async def stop(ctx):
         await voice_client.stop()
     else:
         await ctx.send("The bot is not playing anything at the moment.")
-
+#----------------------------------------------------------------------------
+#==============================ADMIN COMMANDS================================
+#----------------------------------------------------------------------------
 @bot.command(name='purge', help='Deletes messages, specify a number for multiple')
 async def purge(ctx, amount = 5):
-    await ctx.channel.purge(limit=amount+1)
-    print(ctx.channel, 'has just been purged:', amount, 'messages were deleted')
+    if ctx.message.author.guild_permissions.manage_messages == True:
+        await ctx.channel.purge(limit=amount+1)
+        print(ctx.channel, 'has just been purged:', amount, 'messages were deleted')
+
+    else:
+        text = "Sorry {}, you do not have permissions to do that!".format(ctx.message.author)
+        await ctx.send(text)
+
 
 bot.run(TOKEN)
 
