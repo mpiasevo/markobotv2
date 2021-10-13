@@ -15,6 +15,6 @@ TOKEN = key.TOKEN
 
 bot = commands.Bot(command_prefix='!')
 
-bot.load_extension("music")
+bot.load_extension("cog.music")
 
 bot.run(TOKEN)
