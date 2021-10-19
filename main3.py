@@ -16,6 +16,7 @@ import key
 TOKEN = key.TOKEN
 bot = commands.Bot(command_prefix='!')
 bot.load_extension("cog.markomusic")
+bot.load_extension("cog.markoadmin")
 
 @bot.event
 async def on_ready():

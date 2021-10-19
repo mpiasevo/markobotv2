@@ -41,11 +41,11 @@ ytdl = YoutubeDL(ytdl_format_options)
 
 class VoiceConnectionError(commands.CommandError):
     """Custom Exception Class for Connection Errors"""
-    print('Connection Error')
+    #print('Connection Error')
 
 class InvalidVoiceChannel(VoiceConnectionError):
     """Custom Exception Class for Invalid Voice Channels"""
-    print('Voice Channel Error')
+    #print('Voice Channel Error')
 
 class YTDLSource(discord.PCMVolumeTransformer):
     def __init__(self, source, *, data, requester):
@@ -250,6 +250,19 @@ class Music(commands.Cog):
         #       await ctx.message.add_reaction('')
         await ctx.send(f'**Joined `{channel}`**')
         
+    @commands.command(name='rejoin', aliases=['rj'], description="Makes markobot leave and rejoin")
+    async def rejoin_(self, ctx):
+        """Forces markobot to leave and rejoin the chat
+        This command is implemented in case there is problems with markobot
+        Sometimes leaving and rejoining fixes this"""
+        vc = ctx.voice_client
+        if vc:
+            await ctx.invoke(self.bot.get_command('leave')) #Make note that this is the way you can call other commands in a command
+            await ctx.invoke(self.bot.get_command('join'))
+        else:
+            return await ctx.send('Markobot is not in a channel to leave and rejoin, dummy.')
+
+
     @commands.command(name='play', aliases=['pl'], description="Makes markobot play music!")
     async def play_(self, ctx, *, search: str):
         """Request a song to play (add to queue if already songs)
@@ -274,7 +287,7 @@ class Music(commands.Cog):
 
         await player.queue.put(source)
 
-    @commands.command(name='pause', aliases=['ps'], description="Pauses any music that is playing")
+    @commands.command(name='pause', aliases=['ps', 'stop'], description="Pauses any music that is playing")
     async def pause_(self, ctx):
         """Pause the currently playing song."""
         vc = ctx.voice_client
@@ -386,7 +399,7 @@ class Music(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command(name='leave', aliases=["stop", "dc", "disconnect", "bye"], description="stops music and disconnects from voice")
+    @commands.command(name='leave', aliases=["l", "dc", "disconnect", "bye"], description="stops music and disconnects from voice")
     async def leave_(self, ctx):
         """Stop the currently playing song and destroy the player.
         !Warning!
