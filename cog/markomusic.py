@@ -131,7 +131,7 @@ class MusicPlayer:
 
             try:
                 #Wait for the next song. If we timeout cancel the player and disconnect...
-                async with timeout(300): #5 mins
+                async with timeout(1200): #5 mins
                     source = await self.queue.get()
             except asyncio.TimeoutError:
                 print('Timeout Error')
@@ -147,22 +147,22 @@ class MusicPlayer:
                                              f'```css\n[{e}]\n```')
                     continue
                 
-                source.volume = self.volume
-                self.current = source
+            source.volume = self.volume
+            self.current = source
 
-                self._guild.voice_client.play(source, after=lambda _: self.bot.loop.call_soon_threadsafe(self.next.set))
-                #embed = discord.Embed(title="Now playing", description=f"[{source.title}]({source.web_url}) [{source.requester.mention}])", color=discord.Color.green())
-                #self.np = await self._channel.send(embed=embed)
-                self.np = await self._channel.send(f"Now playing [{source.title}]")
-                await self.next.wait()
+            self._guild.voice_client.play(source, after=lambda _: self.bot.loop.call_soon_threadsafe(self.next.set))
+            #embed = discord.Embed(title="Now playing", description=f"[{source.title}]({source.web_url}) [{source.requester.mention}])", color=discord.Color.green())
+            #self.np = await self._channel.send(embed=embed)
+            self.np = await self._channel.send(f"Now playing [{source.title}]")
+            await self.next.wait()
 
-                #Make sure the FFmpeg process is cleaned up
-                source.cleanup()
-                self.current = None
+            #Make sure the FFmpeg process is cleaned up
+            source.cleanup()
+            self.current = None
         
-        def destroy(delf, guild):
-            """Disconnect and cleanup the player"""
-            return self.bot.loop.creat_task(self._cog.cleanup(guild))
+    def destroy(self, guild):
+        """Disconnect and cleanup the player"""
+        return self.bot.loop.create_task(self._cog.cleanup(guild))
 
 class Music(commands.Cog):
     """Music Related Commands."""
