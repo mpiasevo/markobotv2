@@ -8,5 +8,9 @@ A simple discord bot
 	- Readded the purge feature
 		- This command has been redone, now will notify the server which server deleted music and username of who deleted
 	- Setup the markoadmin cog, we can now create admin commands
+- 10.29.21: 2 new commands!
+	- For real this time, fixed the queue ending locking up markobot bug
+	- Added hello command, please say hi to markobot sometimes
+	- Added coinflip command, for when you want to flip a coin, but don't have a real coin
  
 

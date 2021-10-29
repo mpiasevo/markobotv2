@@ -2,6 +2,7 @@
 #Testing cog for commands and queues
 import discord
 from discord.ext import commands
+import time
 import random
 import asyncio
 import itertools
@@ -17,6 +18,7 @@ TOKEN = key.TOKEN
 bot = commands.Bot(command_prefix='!')
 bot.load_extension("cog.markomusic")
 bot.load_extension("cog.markoadmin")
+bot.load_extension("cog.markofun")
 
 @bot.event
 async def on_ready():
