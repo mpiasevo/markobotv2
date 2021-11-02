@@ -85,6 +85,23 @@ class Fun(commands.Cog):
         #text = "The result is **{}**".format(result)
         await ctx.send(text)
 
+    @commands.command(name='cprice', description='Check the price of your Crypto')
+    async def crypto_(self, ctx, crypto = 'BTC'):
+        """Check the price of your crypto.
+        Parameters
+        ----------
+        defaults to BTC
+        !cprice [crypto] to choose a crypto
+        """
+        start = (dt.datetime.now() + dt.timedelta(days=-1))
+        end = dt.datetime.now()
+        crypto = crypto+'-USD'
+        ltc = web.DataReader(crypto,'yahoo', start, end)
+        price = ltc.iloc[0]['Close']
+        volume = ltc.iloc[0]['Volume']
+        text = "Your crypto is priced at **${}** with a volume of **{}** traded on **{}**".format(price,volume,end)
+        await ctx.send(text)
+
 def setup(bot):
     bot.add_cog(Fun(bot))
 
