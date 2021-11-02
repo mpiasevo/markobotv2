@@ -74,10 +74,14 @@ class Fun(commands.Cog):
         result = random.choice(options)
         await ctx.send("Flipping a virtual coin...")
         time.sleep(1)
-        if choice == result:
-            text = "You win, you chose **{}** the result was **{}**".format(coice, result)
+        if choice == "heads" or choice == "tails":
+
+            if choice == result:
+                text = "You win, you chose **{}** the result was **{}**".format(choice, result)
+            else:
+                text = "You lose, you chose **{}** and the result was **{}**".format(choice, result)
         else:
-            text = "You lose, you chose **{}** and the result was **{}**".format(choice, result)
+            text = "The only sides on a coin are heads and tails, you chose **{}**".format(choice)
         #text = "The result is **{}**".format(result)
         await ctx.send(text)
 
