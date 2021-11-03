@@ -3,6 +3,8 @@ import discord
 from discord.ext import commands
 import random
 import time
+import datetime as dt
+import pandas_datareader as web
 import asyncio
 import itertools
 import sys
@@ -93,15 +95,19 @@ class Fun(commands.Cog):
         defaults to BTC
         !cprice [crypto] to choose a crypto
         """
-        start = (dt.datetime.now() + dt.timedelta(days=-1))
-        end = dt.datetime.now()
-        crypto = crypto+'-USD'
-        ltc = web.DataReader(crypto,'yahoo', start, end)
-        price = ltc.iloc[0]['Close']
-        volume = ltc.iloc[0]['Volume']
-        text = "Your crypto is priced at **${}** with a volume of **{}** traded on **{}**".format(price,volume,end)
-        await ctx.send(text)
-
+        try:
+            start = (dt.datetime.now() + dt.timedelta(days=-1)) #DataReader parameter
+            end = dt.datetime.now() #DataReader parameter
+            crypto = crypto.upper() #Make user input uppercase
+            search = crypto+'-USD' #DataReader parameter
+            ltc = web.DataReader(search,'yahoo', start, end) #DataReader search
+            price = ltc.iloc[0]['Close'] #price of crypto
+            volume = ltc.iloc[0]['Volume'] #volume of crypto sold on that date
+            date = end.strftime("%m/%d/%y") #format date correctly
+            text = "**{}** is priced at **${:,.2f}** with a volume of **{:,}** traded on **{}**".format(crypto,price,volume,date)
+            await ctx.send(text)
+        except:
+            await ctx.send("**{}** is an invalid cryptocurrency, sorry.".format(crypto))
 def setup(bot):
     bot.add_cog(Fun(bot))
 
