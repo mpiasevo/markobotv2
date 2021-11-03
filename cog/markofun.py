@@ -108,6 +108,9 @@ class Fun(commands.Cog):
             await ctx.send(text)
         except:
             await ctx.send("**{}** is an invalid cryptocurrency, sorry.".format(crypto))
+    
+    #Not sure what other commands to add
+
 def setup(bot):
     bot.add_cog(Fun(bot))
 
