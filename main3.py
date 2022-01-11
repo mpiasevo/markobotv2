@@ -13,6 +13,7 @@ from functools import partial
 import youtube_dl
 from youtube_dl import YoutubeDL
 import key
+import matplotlib.pyplot as plt
 
 intents = discord.Intents().all()
 client = discord.Client(intents=intents)
@@ -27,10 +28,6 @@ messages = joined = 0
 track = {}
 member = "MP#4163"
 nmessages = 0
-#async for message in ctx.channel.history():
-#    if message.author == member:
-#        nmessages += 1
-#    print(nmessages)
 
 @bot.event
 async def on_ready():
@@ -41,7 +38,7 @@ async def on_ready():
     with open("stats.txt", "r") as f:
         first = f.read().split('\n',1)[0]
         result = first.split(';')[1]
-        print(result)
+        #print(result)
         track = eval(result)
         print(track)
 

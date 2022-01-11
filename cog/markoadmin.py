@@ -16,6 +16,7 @@ from functools import partial
 import youtube_dl
 from youtube_dl import YoutubeDL
 import main3
+import matplotlib.pyplot as plt
 
 intents = discord.Intents().all()
 client = discord.Client(intents=intents)
@@ -85,6 +86,34 @@ class Admin(commands.Cog):
             if str(msg.author) == member1:
                 nmessages1 += 1
         print(ctx.message.channel, member1, nmessages1)
+    
+    @commands.command(name = 'chart', description='Shows chart of data (messages, channels)')
+    async def chart_(self, ctx, chart = ''):
+        labels = []
+        sizes = []
+        if chart == "messages":
+            await asyncio.sleep(2)
+            temp = main3.track.items()
+            for value in temp:
+                labels.append(value[0])
+                sizes.append(value[1])
+            
+            plt.pie(sizes, labels=labels, autopct=lambda p: '{:.2f}%\n({:.0f})'.format(p,(p/100)*sum(sizes)), shadow=False, startangle=90)
+            plt.axis('equal') #equal aspect ratio ensures that pie is drawn as circle
+            plt.savefig('messages.png')
+            
+            file = discord.File("messages.png", filename="messages.png")
+            
+            #embed = discord.Embed(Title="Messages Sent", color=0xff0000)
+            #embed.set_image(url="attachment://messages.png")
+
+            await ctx.send("Messages Sent:", file=file)
+
+            #print(labels)
+            #print(sizes)
+                
+        else:
+            print("Error selection")
 
 def setup(bot):
     bot.add_cog(Admin(bot))
