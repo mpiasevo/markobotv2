@@ -15,6 +15,7 @@ from async_timeout import timeout
 from functools import partial
 import youtube_dl
 from youtube_dl import YoutubeDL
+import main3
 
 intents = discord.Intents().all()
 client = discord.Client(intents=intents)
@@ -63,6 +64,27 @@ class Admin(commands.Cog):
         else:
             text = "Sorry {}, you do not have permissions to do that!".format(ctx.message.author)
             await ctx.send(text)
+    
+    @commands.command(name = 'stats', description='Shows you your server stats!')
+    async def stats_(self, ctx):
+        temp = sorted(main3.track.items(), key=lambda x: x[1], reverse = True)
+        embed = discord.Embed(title="Message Stats", color=0xff0000)
+        for value in temp:
+            embed.add_field(name=value[0], value=f"{value[1]} messages sent", inline=False)
+        await ctx.send(embed=embed)       
+        #await ctx.send('{} has sent {} messages (that I know of).'.format(ctx.message.author, temp))
+    
+    @commands.command(name = 'update', description='update messages temp command')
+    async def update_(self, ctx, name = ''):
+        nmessages1 = 0
+        member1 = name
+        #for mem in ctx.guild.members:
+        #    print(mem)
+        async for msg in ctx.channel.history(limit=None):
+                #if msg.author == ctx.message.author:
+            if str(msg.author) == member1:
+                nmessages1 += 1
+        print(ctx.message.channel, member1, nmessages1)
 
 def setup(bot):
     bot.add_cog(Admin(bot))
