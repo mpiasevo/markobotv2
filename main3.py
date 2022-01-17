@@ -80,5 +80,3 @@ async def on_message(message):
 bot.loop.create_task(update_stats()) #runs function in the background on loop
 
 bot.run(TOKEN)
-
-

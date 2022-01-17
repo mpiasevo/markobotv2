@@ -92,7 +92,7 @@ class Admin(commands.Cog):
         labels = []
         sizes = []
         if chart == "messages":
-            await asyncio.sleep(2)
+            #await asyncio.sleep(2)
             temp = main3.track.items()
             for value in temp:
                 labels.append(value[0])
