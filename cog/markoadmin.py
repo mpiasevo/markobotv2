@@ -7,6 +7,7 @@ I wonder if I can make the bot detect if csgo gets opened by someone :D`
 import discord
 from discord.ext import commands
 import random
+import os
 import asyncio
 import itertools
 import sys
@@ -17,6 +18,7 @@ import youtube_dl
 from youtube_dl import YoutubeDL
 import main3
 import matplotlib.pyplot as plt
+import sqlite3
 
 intents = discord.Intents().all()
 client = discord.Client(intents=intents)
@@ -68,47 +70,106 @@ class Admin(commands.Cog):
     
     @commands.command(name = 'stats', description='Shows you your server stats!')
     async def stats_(self, ctx):
-        temp = sorted(main3.track.items(), key=lambda x: x[1], reverse = True)
+        temp = {}
+        db = sqlite3.connect('messages.sqlite')
+        cursor = db.cursor()
         embed = discord.Embed(title="Message Stats", color=0xff0000)
-        for value in temp:
-            embed.add_field(name=value[0], value=f"{value[1]} messages sent", inline=False)
+        for mem in ctx.guild.members:
+            cursor.execute("SELECT SUM(msgs) FROM main WHERE guild_id = ? AND user_id = ?",(f'"{ctx.guild}"',f'"{mem}"',))
+            result = cursor.fetchone()
+            if result[0] is None:
+                pass
+            else:
+                temp[str(mem)]=result[0]
+        sorttemp = sorted(temp.items(), key=lambda x: x[1], reverse = True)
+        for value in sorttemp:
+            if value[1] > 10:
+                embed.add_field(name=value[0], value=f"{value[1]} messages sent", inline=False)
+            else:
+                pass
         await ctx.send(embed=embed)       
-        #await ctx.send('{} has sent {} messages (that I know of).'.format(ctx.message.author, temp))
-    
+        cursor.close()
+        db.close()
+
     @commands.command(name = 'update', description='update messages temp command')
     async def update_(self, ctx, name = ''):
         nmessages1 = 0
         member1 = name
-        #for mem in ctx.guild.members:
-        #    print(mem)
-        async for msg in ctx.channel.history(limit=None):
-                #if msg.author == ctx.message.author:
-            if str(msg.author) == member1:
-                nmessages1 += 1
-        print(ctx.message.channel, member1, nmessages1)
+        db = sqlite3.connect('messages.sqlite')
+        cursor = db.cursor()
+        if str(ctx.message.author) == "MP#4163":
+            for chan in ctx.guild.text_channels:
+                for mem in ctx.guild.members:
+                    async for msg in chan.history(limit=None):
+                        if str(msg.author) == str(mem):
+                            nmessages1 += 1
+                        else:
+                            pass
+                    print(ctx.guild, chan, mem, nmessages1)
+                    cursor.execute(f'SELECT msgs FROM main WHERE guild_id = ? and channel_id = ? and user_id = ?', (f'"{ctx.guild}"', f'"{chan}"', f'"{mem}"',))
+                    result = cursor.fetchone()
+                    if result is None:
+                        sql = ("INSERT INTO main(guild_id, channel_id, user_id, msgs) VALUES(?,?,?,?)")
+                        val = (f'"{ctx.guild}"', f'"{chan}"', f'"{mem}"', nmessages1)
+                        cursor.execute(sql, val)
+                        db.commit()
+                    elif result is not None:
+                        sql = ("UPDATE main SET msgs = ? WHERE guild_id = ? and channel_id = ? and user_id = ?")
+                        val = (f'"{ctx.guild}"', f'"{chan}"', f'"{mem}"', nmessages1)
+                        cursor.execute(sql, val)
+                        db.commit()
+                    nmessages1 = 0
+        else:
+            await ctx.send("You do not have permission to use this powerful command. Sorry")
+        cursor.close()
+        db.close()
+        #print(ctx.message.guild, ctx.message.channel, member1, nmessages1)
     
     @commands.command(name = 'chart', description='Shows chart of data (messages, channels)')
     async def chart_(self, ctx, chart = ''):
         labels = []
         sizes = []
+        temp = {}
         if chart == "messages":
-            #await asyncio.sleep(2)
-            temp = main3.track.items()
-            for value in temp:
+            db = sqlite3.connect('messages.sqlite')
+            cursor = db.cursor()
+            for mem in ctx.guild.members:
+                cursor.execute("SELECT SUM(msgs) FROM main WHERE guild_id = ? AND user_id = ?",(f'"{ctx.guild}"',f'"{mem}"',))
+                result = cursor.fetchone()
+                if result[0] is None:
+                    pass
+                elif result[0] < 10:
+                    pass
+                else:
+                    temp[str(mem)]=result[0]
+            #print(temp)
+            sorttemp = sorted(temp.items(), key=lambda x: x[1], reverse = True)
+            for value in sorttemp:
                 labels.append(value[0])
                 sizes.append(value[1])
-            
-            plt.pie(sizes, labels=labels, autopct=lambda p: '{:.2f}%\n({:.0f})'.format(p,(p/100)*sum(sizes)), shadow=False, startangle=90)
-            plt.axis('equal') #equal aspect ratio ensures that pie is drawn as circle
+
+            await asyncio.sleep(2)    
+            #plt.pie(sizes, labels=labels, autopct=lambda p: '{:.2f}%\n({:.0f})'.format(p,(p/100)*sum(sizes)), shadow=False, startangle=90)
+            colors = ['r','g','b','c','m','y']
+            #plt.xticks(range(len(sizes)), labels)
+            hbars = plt.barh(range(len(sizes)), sizes, color=random.choice(colors))
+            plt.title(f'Messages Sent in {ctx.guild} by Each Member')
+            plt.xlabel('Messages Sent')
+            plt.yticks(range(len(sizes)), labels=labels)
+            #plt.axis('equal') #equal aspect ratio ensures that pie is drawn as circle
+            plt.tight_layout()
+            #labels next to bar
+            for i in range(len(sizes)):
+                plt.annotate(str(sizes[i]), xy=(sizes[i]-20,i), ha='center', va='bottom')
             plt.savefig('messages.png')
             
             file = discord.File("messages.png", filename="messages.png")
-            
-            #embed = discord.Embed(Title="Messages Sent", color=0xff0000)
-            #embed.set_image(url="attachment://messages.png")
-
             await ctx.send("Messages Sent:", file=file)
 
+            plt.clf()
+            plt.cla()
+            plt.close()
+            os.remove("messages.png")
             #print(labels)
             #print(sizes)
                 

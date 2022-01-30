@@ -1,18 +1,12 @@
-import os
-import time
+import sqlite3
 
-def clean():
-    print("File Cleanup Initiated")
-    directory = os.getcwd()
+db = sqlite3.connect('messages.sqlite')
+cursor = db.cursor()
+cursor.execute("SELECT SUM(msgs) FROM main WHERE guild_id = ? AND user_id = ?",('"Fourth International"','"NSZ#9679"',))
+result = cursor.fetchone()
+print(result)
+db.commit()
+cursor.close()
+db.close()
 
-    files_in_directory = os.listdir(directory)
-    files = 0
-    filtered_files = [file for file in files_in_directory if file.endswith(".webm") or file.endswith(".m4a")]
-    for file in filtered_files:
-        files = files + 1
-        path_to_file = os.path.join(directory, file)
-        os.remove(path_to_file)
-        print(files, 'Files Deleted')
-    if files == 0:
-        print("No Cleanup Needed")
 

@@ -14,12 +14,15 @@ import youtube_dl
 from youtube_dl import YoutubeDL
 import key
 import matplotlib.pyplot as plt
+import sqlite3
+
 
 intents = discord.Intents().all()
+intents.members = True
 client = discord.Client(intents=intents)
 
 TOKEN = key.TOKEN
-bot = commands.Bot(command_prefix='!')
+bot = commands.Bot(command_prefix='!', intents=intents)
 bot.load_extension("cog.markomusic")
 bot.load_extension("cog.markoadmin")
 bot.load_extension("cog.markofun")
@@ -32,6 +35,16 @@ nmessages = 0
 @bot.event
 async def on_ready():
     global track
+#    db = sqlite3.connect('messages.sqlite') ######Initial database setup
+#    cursor = db.cursor()
+#    cursor.execute('''
+#            CREATE TABLE IF NOT EXISTS main(
+#            guild_id TEXT,
+#            channel_id TEXT,
+#            user_id TEXT,
+#            msgs INTEGER
+#            )
+#            ''')
     await bot.change_presence(activity=discord.Game('you. !help'))
     print('We have logged in as {0.user}'.format(bot))
     
@@ -71,6 +84,27 @@ async def on_message(message):
     global track
     global messages
     message_author = (f"{message.author}")
+    message_author2 = (f'"{message.author}"')
+    message_guild = (f'"{message.guild}"')
+    message_channel = (f'"{message.channel}"')
+    db = sqlite3.connect('messages.sqlite')
+    cursor = db.cursor()
+    cursor.execute(f'SELECT msgs FROM main WHERE guild_id = ? and channel_id = ? and user_id = ?', (message_guild, message_channel, message_author2,))
+    result = cursor.fetchone()
+    print(result)
+    if result is None:
+        sql = ("INSERT INTO main(guild_id, channel_id, user_id, msgs) VALUES(?,?,?,?)")
+        val = (message_guild, message_channel, message_author2, 1)
+        cursor.execute(sql, val)
+        db.commit()
+    elif result is not None:
+        sql = ("UPDATE main SET msgs = msgs + 1 WHERE guild_id = ? and channel_id = ? and user_id = ?")
+        val = (message_guild, message_channel, message_author2)
+        cursor.execute(sql, val)
+        db.commit()
+    cursor.close()
+    db.close()
+
     if message_author in track:
         track[f"{message.author}"] += 1
         print(track)
